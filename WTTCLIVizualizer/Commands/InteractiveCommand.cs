@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using WTTCLIVizualizer.Data;
@@ -9,6 +10,7 @@ namespace WTTCLIVizualizer.Commands;
 
 public class InteractiveCommand : Command<InteractiveCommand.Settings>
 {
+    Color[] Colors = new Color[]{Color.Red,Color.Green,Color.Blue,Color.Yellow,Color.Violet,Color.Lime,Color.Maroon};
     public override int Execute(CommandContext context, Settings settings)
     {
         Arguments arguments = new Arguments();
@@ -16,7 +18,7 @@ public class InteractiveCommand : Command<InteractiveCommand.Settings>
             new TextPrompt<bool>("Do you want interactive usage?")
             .AddChoice(true)
             .AddChoice(false)
-            .DefaultValue(false)
+            .DefaultValue(true)
             .WithConverter(choice => choice ? "y" : "n")
         );
         if(!confirmInteractive){
@@ -77,31 +79,101 @@ public class InteractiveCommand : Command<InteractiveCommand.Settings>
             .SelectMany(userData => userData.dailySessions.Select(daily => new DateOnly(daily.date.Year, daily.date.Month, daily.date.Day)))
             .Distinct() // Remove duplicate dates
             .ToList();
+            DateOnly fromDate = default;
+            DateOnly toDate = default;
             if(dates.Count == 1){
+                fromDate = toDate = dates[0];
                 AnsiConsole.Write(new Markup($"Loaded data for [yellow bold]{dates[0]}[/].{Environment.NewLine}"));
             }
             else{
-                var fromDate = AnsiConsole.Prompt(
+                fromDate = AnsiConsole.Prompt(
                     new SelectionPrompt<DateOnly>()
                         .Title($"From which date u want analize?")
+                        .EnableSearch()
                         .PageSize(10)
                         .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
                         .AddChoices(dates)
                 );
-                var toDate = AnsiConsole.Prompt(
+                toDate = AnsiConsole.Prompt(
                     new SelectionPrompt<DateOnly>()
-                        .Title($"From which date u want analize?")
+                        .Title($"To which date u want analize? [yellow bold]From = {fromDate}[/]")
+                        .EnableSearch()
                         .PageSize(10)
                         .MoreChoicesText("[grey](Move up and down to reveal more dates)[/]")
-                        .AddChoices(dates.Where(d=>d > fromDate))
+                        .AddChoices(dates.Where(d=>d > fromDate).Append(fromDate))
                 );
-                AnsiConsole.Write(new Markup($"Selected data [yellow bold]{fromDate}-{toDate}[/].{Environment.NewLine}"));
+                if(fromDate == toDate){
+                    AnsiConsole.Write(new Markup($"Loaded data for [yellow bold]{dates[0]}[/].{Environment.NewLine}"));
+                }else{
+                    AnsiConsole.Write(new Markup($"Selected period [yellow bold]{fromDate}-{toDate}[/].{Environment.NewLine}"));
+                }
             }
-        Dictionary<string,long> chartItemData = new();
+        Dictionary<string,double> chartItemData = new();
+        var chartItemColors = new Dictionary<string,Color>();
         var enumValues = deserialized.extConfig.enums.Where(x=>x.name == "ActionType").Single();
-        foreach(string enm in enumValues.values){
-            
+        for(int i=0;i<enumValues.values.Count;i++){
+            chartItemData.Add(enumValues.values[i],0);
+            chartItemColors.Add(enumValues.values[i],Colors[i]);
         }
+        //getting type of chart
+        var chartType = AnsiConsole.Prompt<ChartType>(
+            new SelectionPrompt<ChartType>()
+                .Title($"What type of chart do You want?")
+                .PageSize(10)
+                .MoreChoicesText("[grey](Move up and down to reveal more dates)[/]")
+                .AddChoices(new []{ChartType.Bar,ChartType.BreakDown,ChartType.Table})
+        );
+        var values = deserialized.data
+            .AsParallel() // Enable parallel processing
+            .Where(userData => avaliableUsers.Contains(userData.user)) 
+            .SelectMany(userData => userData.dailySessions
+                .Where(daily=>
+                    new DateOnly(daily.date.Year, daily.date.Month, daily.date.Day) == fromDate 
+                    || new DateOnly(daily.date.Year, daily.date.Month, daily.date.Day) == toDate
+                    ).Select(daily=>daily))
+            .SelectMany(session=>session.sessions)
+            .ToList();
+
+        values.ForEach(x=>{
+            if(x.actionType != "Idle"){
+                chartItemData[x.actionType] += x.sessionInfo.duration;
+            }
+            if(x.actionType == "Idle"){
+                chartItemData["Idle"] += x.sessionInfo.idle;
+            }
+        });
+        var rule = new Rule("[blue bold]Number of hours spend on action[/]");
+        rule.Justification = Justify.Center;
+        AnsiConsole.Write(rule);
+        switch(chartType){
+            case ChartType.Bar:
+                AnsiConsole.Write(new BarChart()
+                        // .Width(60)
+                        .AddItems(chartItemData, (item) => new BarChartItem(
+                            item.Key, Math.Round(item.Value/1000/60/60,2) , chartItemColors[item.Key])));
+            break;
+            case ChartType.BreakDown:
+                AnsiConsole.WriteLine();
+                AnsiConsole.Write(new BreakdownChart()
+                        .Width(60)
+                        .AddItems(chartItemData, (item) => new BreakdownChartItem(
+                            item.Key, Math.Round(item.Value/1000/60/60,2) , chartItemColors[item.Key])));
+            break;
+            case ChartType.Table:
+                Table table = new Table();
+                foreach(var item in chartItemData){
+                    table.AddColumn($"[{chartItemColors[item.Key].ToMarkup()}]{item.Key}[/]");
+                }
+                var sb = new List<string>();
+                foreach(var item in enumValues.values){
+                    sb.Add($"[{chartItemColors[item].ToMarkup()}]{Math.Round(chartItemData[item]/1000/60/60,2)}[/]");
+                }
+                table.Alignment(Justify.Center);
+                table.AddRow(sb.ToArray());
+                AnsiConsole.Write(table); 
+            break;
+        }
+        AnsiConsole.WriteLine();
         return 0;
     }
 

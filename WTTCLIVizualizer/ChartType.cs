@@ -1,5 +1,6 @@
 namespace WTTCLIVizualizer;
 public enum ChartType{
     BreakDown,
-    Bar
+    Bar,
+    Table
 }
