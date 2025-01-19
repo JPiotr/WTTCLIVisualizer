@@ -15006,6 +15006,48 @@
                                 ]
                             },
                             "actionType": "Idle"
+                        },
+                        {
+                            "sessionInfo": {
+                                "id": "067991e6-8224-44fe-81be-2261446c997c",
+                                "duration": 12990,
+                                "idle": 117877,
+                                "state": "Idle",
+                                "durations": [
+                                    {
+                                        "id": "cb47beb3-dced-4895-842d-4f70738fad71",
+                                        "state": "Idle",
+                                        "begin": 1737295163263,
+                                        "end": 1737295163263,
+                                        "duration": 0
+                                    },
+                                    {
+                                        "id": "06d9a26c-ce2c-4b92-b6d7-51d84942e657",
+                                        "state": "Ongoing",
+                                        "begin": 1737295153084,
+                                        "end": 1737295163263,
+                                        "duration": 10179
+                                    },
+                                    {
+                                        "id": "317cbdc6-bf50-423e-b031-02064aeb0dbb",
+                                        "state": "Idle",
+                                        "begin": 1737295048200,
+                                        "end": 1737295153084,
+                                        "duration": 104884
+                                    },
+                                    {
+                                        "id": "70f6e0ac-2adc-4c73-bc2b-01c1361ed151",
+                                        "state": "Ongoing",
+                                        "begin": 1737295045389,
+                                        "end": 1737295048200,
+                                        "duration": 2811
+                                    }
+                                ],
+                                "filesExt": [
+                                    ".cs"
+                                ]
+                            },
+                            "actionType": "Idle"
                         }
                     ]
                 }

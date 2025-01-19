@@ -263,7 +263,7 @@ public class InteractiveCommand : Command<InteractiveCommand.Settings>
         );
     }
 
-    private static void Calculate(Dictionary<string, double> chartItemData, List<Session> values)
+    private void Calculate(Dictionary<string, double> chartItemData, List<Session> values)
     {
         values.ForEach(x =>
         {
@@ -293,21 +293,21 @@ public class InteractiveCommand : Command<InteractiveCommand.Settings>
     private List<Session> PrepereData()
     {
         var values = Deserialized.data
-            .AsParallel()
-            .Where(userData => Arguments.Users.Contains(userData.user))
-            .SelectMany(userData => userData.dailySessions
-                .Where(daily =>
-                    new DateOnly(daily.date.Year, daily.date.Month, daily.date.Day) == Arguments.StartDate
-                    || new DateOnly(daily.date.Year, daily.date.Month, daily.date.Day) == Arguments.EndDate
-                    ).Select(daily => daily))
-            .SelectMany(session => session.sessions)
-            .ToList();
+                    .Where(userData => Arguments.Users.Contains(userData.user))
+                    .SelectMany(userData => userData.dailySessions
+                        .Where(daily =>
+                            DateOnly.FromDateTime(daily.date) >= Arguments.StartDate &&
+                            DateOnly.FromDateTime(daily.date) <= Arguments.EndDate)
+                        .Select(daily => daily))
+                    .SelectMany(session => session.sessions)
+                    .ToList();
         return values;
     }
 
     private void RetriveDates()
     {
         List<DateOnly> dates = GetDatesFromFIle();
+        dates.Sort();
         if (dates.Count == 1)
         {
             Arguments.StartDate = Arguments.EndDate = dates[0];
