@@ -112,8 +112,8 @@ public class InteractiveCommand : Command<InteractiveCommand.Settings>
             }
             else
             {
-                Arguments.StartDate = settings.Start == DateOnly.MinValue ? dates.First() : settings.Start; 
-                Arguments.EndDate = settings.End == DateOnly.MaxValue ? dates.Last() : settings.End; 
+                Arguments.StartDate = settings.Start == DateOnly.MinValue && settings.End >= dates.First() ? dates.First() : settings.Start; 
+                Arguments.EndDate = settings.End == DateOnly.MaxValue && settings.Start <= dates.Last() ? dates.Last() : settings.End; 
             }
 
             if (Arguments.StartDate == Arguments.EndDate)
