@@ -1,4 +1,4 @@
-# Working Time Tracker CLI vizualizer. 
+# [Working Time Tracker](https://github.com/JPiotr/workingtimetracker) CLI visualizer. 
 > Build with [Spectre Console](https://spectreconsole.net/)
 
 Simply run .exe file in location where You have .workingtime file.
