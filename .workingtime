@@ -15048,6 +15048,41 @@
                                 ]
                             },
                             "actionType": "Idle"
+                        },
+                        {
+                            "sessionInfo": {
+                                "id": "7eafe3fc-1b80-46ff-b1d4-3b0156a049f2",
+                                "duration": 43728,
+                                "idle": 122874,
+                                "state": "Ongoing",
+                                "durations": [
+                                    {
+                                        "id": "26603368-572e-4c3c-beb8-d36420c9b6e8",
+                                        "state": "Ongoing",
+                                        "begin": 1737295814043,
+                                        "end": 1737295814043,
+                                        "duration": 0
+                                    },
+                                    {
+                                        "id": "46a884d3-a9b2-40d3-aa58-80e2b6ba5e1d",
+                                        "state": "Idle",
+                                        "begin": 1737295734897,
+                                        "end": 1737295814043,
+                                        "duration": 79146
+                                    },
+                                    {
+                                        "id": "7843dd22-89db-45e5-9249-d7379fce5e18",
+                                        "state": "Ongoing",
+                                        "begin": 1737295733674,
+                                        "end": 1737295734897,
+                                        "duration": 1223
+                                    }
+                                ],
+                                "filesExt": [
+                                    ".cs"
+                                ]
+                            },
+                            "actionType": "Codding"
                         }
                     ]
                 }

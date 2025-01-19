@@ -103,30 +103,19 @@ public class InteractiveCommand : Command<InteractiveCommand.Settings>
                 }
             }
             var dates = GetDatesFromFIle();
+            dates.Sort();
             enumValues = PrepereChartInput(chartItemData, chartItemColors);
+
             if (dates.Count() == 1)
             {
                 Arguments.StartDate = Arguments.EndDate = dates.First();
             }
             else
             {
-                if (settings.Start == DateOnly.MinValue)
-                {
-                    Arguments.StartDate = dates.First();
-                }
-                else if (dates.Contains(settings.Start))
-                {
-                    Arguments.StartDate = settings.Start;
-                }
-                if (settings.End == DateOnly.MaxValue)
-                {
-                    Arguments.EndDate = dates.Last();
-                }
-                else if (dates.Contains(settings.End))
-                {
-                    Arguments.EndDate = settings.End;
-                }
+                Arguments.StartDate = settings.Start == DateOnly.MinValue ? dates.First() : settings.Start; 
+                Arguments.EndDate = settings.End == DateOnly.MaxValue ? dates.Last() : settings.End; 
             }
+
             if (Arguments.StartDate == Arguments.EndDate)
             {
                 AnsiConsole.Write(new Markup($"Loaded data for [yellow bold]{Arguments.StartDate}[/].{Environment.NewLine}"));
